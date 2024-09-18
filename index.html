@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Splash Page</title>
+    <title>Splash Page with Hearts</title>
     <style>
         body {
             margin: 0;
@@ -12,15 +12,22 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #ffe4e1; /* Light Pink background color */
-            font-family: Arial, sans-serif;
+            background-color: #dc74e0;
+            font-family: cursive, sans-serif;
+            overflow: hidden; /* Prevent scrollbars when hearts are animating */
         }
 
-        .splash-container, .message-container {
+        .container {
             text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
-        .splash-container h1 {
+        .visible {
+            opacity: 1;
+        }
+
+        .splash-container h1, .message-container h1, .restaurant-container h1 {
             font-size: 2.5rem;
         }
 
@@ -38,24 +45,182 @@
         .enter-btn:hover {
             background-color: #0056b3;
         }
+
+        select {
+            padding: 10px;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        #messagePage, #restaurantPage, #areYouSurePage {
+            display: none;
+        }
+
+        /* Mobile-friendly design */
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .enter-btn {
+                font-size: 1rem;
+                padding: 8px 16px;
+            }
+
+            select {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Heart animation styles */
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff6b6b;
+            clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 50% 85%, 20% 100%, 0% 35%);
+            animation: float 5s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div id="splashPage" class="splash-container">
+    <!-- Splash Page -->
+    <div id="splashPage" class="container visible">
         <h1>Hi Crystal ^_^</h1>
         <button class="enter-btn" onclick="enterSite()">Enter</button>
     </div>
 
-    <div id="messagePage" class="message-container" style="display: none;">
+    <!-- Message Page with Yes/No Dropdown -->
+    <div id="messagePage" class="container">
         <h1>Are you still up to getting dinner with me?</h1>
         <p>- Dan</p>
+        <select id="dinnerSelect" onchange="handleSelection()">
+            <option value="">-- Select an Option --</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+        </select>
+    </div>
+
+    <!-- Restaurant List Page -->
+    <div id="restaurantPage" class="container">
+        <h1>Here's some places I've had in mind':</h1>
+        <ul id="restaurantList"></ul>
+    </div>
+
+    <!-- Are You Sure Page (For "No" Option) -->
+    <div id="areYouSurePage" class="container">
+        <h1>Are you sure?</h1>
+        <p>Refreshing in <span id="countdown">10</span> seconds...</p>
     </div>
 
     <script>
+        const restaurants = [
+            "Benemon - Japanese", "Saito - Japanese", "Soothr - Thai", 
+            "Dante's - Cocktail Bar & Food"
+        ];
+
+        let noCount = 0;
+        let countdown = 10;
+        let interval;
+
         function enterSite() {
-            document.getElementById('splashPage').style.display = 'none';
-            document.getElementById('messagePage').style.display = 'block';
+            document.getElementById('splashPage').style.display = 'none'; // Hide splash
+            const messagePage = document.getElementById('messagePage');
+            messagePage.style.display = 'block'; // Show message page
+            setTimeout(() => {
+                messagePage.classList.add('visible');
+            }, 10); // Fade in for smooth transition
+        }
+
+        function handleSelection() {
+            const selection = document.getElementById('dinnerSelect').value;
+
+            if (selection === 'yes') {
+                sprinkleHearts(); // Sprinkle hearts when yes is selected
+                document.getElementById('messagePage').style.display = 'none'; // Hide message page
+                const restaurantPage = document.getElementById('restaurantPage');
+                restaurantPage.style.display = 'block'; // Show restaurant page
+                setTimeout(() => {
+                    restaurantPage.classList.add('visible');
+                }, 10); // Fade in restaurant options
+
+                // Shuffle and display restaurants
+                const shuffledRestaurants = restaurants.sort(() => 0.5 - Math.random());
+                let restaurantListHTML = '';
+                shuffledRestaurants.slice(0, 4).forEach(restaurant => {
+                    restaurantListHTML += `<li>${restaurant}</li>`;
+                });
+                document.getElementById('restaurantList').innerHTML = restaurantListHTML;
+
+            } else if (selection === 'no') {
+                noCount++;
+                document.getElementById('messagePage').style.display = 'none'; // Hide message page
+                const areYouSurePage = document.getElementById('areYouSurePage');
+                areYouSurePage.style.display = 'block'; // Show "Are you sure?" page
+                setTimeout(() => {
+                    areYouSurePage.classList.add('visible');
+                }, 10); // Fade in confirmation page
+
+                let message = 'Are you sure?';
+                if (noCount >= 2) {
+                    message = "It seems like you're not up for it, let's try another time!";
+                }
+                document.getElementById('areYouSurePage').querySelector('h1').textContent = message;
+
+                // Countdown logic
+                const countdownElement = document.getElementById('countdown'); // Moved inside function
+                clearInterval(interval); // Clear any previous interval
+                countdown = 10;
+                interval = setInterval(function () {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    if (countdown === 0) {
+                        clearInterval(interval); // Stop the countdown
+                        window.location.reload(); // Example: Reload the page
+                    }
+                }, 1000);
+            }
+        }
+
+        function sprinkleHearts() {
+            const numberOfHearts = 30; // Set the number of hearts to be generated
+            for (let i = 0; i < numberOfHearts; i++) {
+                createHeart();
+            }
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            document.body.appendChild(heart);
+            
+            // Randomize heart's starting position
+            const randomX = Math.random() * 100;
+            const randomSize = Math.random() * 10 + 10;
+            heart.style.left = `${randomX}vw`;
+            heart.style.width = `${randomSize}px`;
+            heart.style.height = `${randomSize}px`;
+
+            // Remove the heart after animation to avoid cluttering the DOM
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
         }
     </script>
 
