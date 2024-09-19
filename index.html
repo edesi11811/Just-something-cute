@@ -139,7 +139,8 @@
     <script>
         const restaurants = [
             "Benemon - Japanese", "Saito - Japanese", "Soothr - Thai", 
-            "Dante's - Cocktail Bar & Food", "Blue Ribbon - French" , "Sushi Yasuda - Japanese" , ""
+            "Dante's - Cocktail Bar & Food", "Blue Ribbon Brasserie - French (I think)", 
+            "Sushi Yasuda - Japanese"
         ];
 
         let noCount = 0;
@@ -147,7 +148,12 @@
         let interval;
 
         function enterSite() {
-            showPage('introMessagePage');
+            document.getElementById('splashPage').style.display = 'none'; // Hide splash page
+            const introMessagePage = document.getElementById('introMessagePage');
+            introMessagePage.style.display = 'block'; // Show intro message page
+            setTimeout(() => {
+                introMessagePage.classList.add('visible');
+            }, 10); // Fade in for smooth transition
         }
 
         function showPage(pageId) {
@@ -172,10 +178,9 @@
                 sprinkleHearts(); // Sprinkle hearts when yes is selected
                 showPage('restaurantPage');
 
-                // Shuffle and display restaurants
-                const shuffledRestaurants = restaurants.sort(() => 0.5 - Math.random());
+                // Display all restaurants
                 let restaurantListHTML = '';
-                shuffledRestaurants.slice(0, 4).forEach(restaurant => {
+                restaurants.forEach(restaurant => {
                     restaurantListHTML += `<li>${restaurant}</li>`;
                 });
                 document.getElementById('restaurantList').innerHTML = restaurantListHTML;
