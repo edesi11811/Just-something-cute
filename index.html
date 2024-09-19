@@ -52,7 +52,7 @@
             margin-top: 20px;
         }
 
-        #messagePage, #restaurantPage, #areYouSurePage {
+        #introMessagePage, #messagePage, #restaurantPage, #areYouSurePage {
             display: none;
         }
 
@@ -106,9 +106,15 @@
         <button class="enter-btn" onclick="enterSite()">Enter</button>
     </div>
 
+    <!-- Intro Message -->
+    <div id="introMessagePage" class="container">
+        <h1>I hope you're having a cute Friday Jr!</h1>
+        <button class="enter-btn" onclick="showPage('messagePage')">Next</button>
+    </div>
+
     <!-- Message Page with Yes/No Dropdown -->
     <div id="messagePage" class="container">
-        <h1>Are you still up to getting dinner with me?</h1>
+        <h1>Are you still up for getting dinner with me?</h1>
         <p>- Dan</p>
         <select id="dinnerSelect" onchange="handleSelection()">
             <option value="">-- Select an Option --</option>
@@ -119,8 +125,9 @@
 
     <!-- Restaurant List Page -->
     <div id="restaurantPage" class="container">
-        <h1>Here's some places I've had in mind':</h1>
+        <h1>Here's some places I've had in mind:</h1>
         <ul id="restaurantList"></ul>
+        <h1>Also open to other options too</h1>
     </div>
 
     <!-- Are You Sure Page (For "No" Option) -->
@@ -132,7 +139,7 @@
     <script>
         const restaurants = [
             "Benemon - Japanese", "Saito - Japanese", "Soothr - Thai", 
-            "Dante's - Cocktail Bar & Food"
+            "Dante's - Cocktail Bar & Food", "Blue Ribbon - French" , "Sushi Yasuda - Japanese" , ""
         ];
 
         let noCount = 0;
@@ -140,11 +147,21 @@
         let interval;
 
         function enterSite() {
-            document.getElementById('splashPage').style.display = 'none'; // Hide splash
-            const messagePage = document.getElementById('messagePage');
-            messagePage.style.display = 'block'; // Show message page
+            showPage('introMessagePage');
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.container').forEach(page => {
+                page.style.display = 'none';
+                page.classList.remove('visible');
+            });
+
+            // Show the selected page
+            const selectedPage = document.getElementById(pageId);
+            selectedPage.style.display = 'block';
             setTimeout(() => {
-                messagePage.classList.add('visible');
+                selectedPage.classList.add('visible');
             }, 10); // Fade in for smooth transition
         }
 
@@ -153,12 +170,7 @@
 
             if (selection === 'yes') {
                 sprinkleHearts(); // Sprinkle hearts when yes is selected
-                document.getElementById('messagePage').style.display = 'none'; // Hide message page
-                const restaurantPage = document.getElementById('restaurantPage');
-                restaurantPage.style.display = 'block'; // Show restaurant page
-                setTimeout(() => {
-                    restaurantPage.classList.add('visible');
-                }, 10); // Fade in restaurant options
+                showPage('restaurantPage');
 
                 // Shuffle and display restaurants
                 const shuffledRestaurants = restaurants.sort(() => 0.5 - Math.random());
@@ -170,12 +182,7 @@
 
             } else if (selection === 'no') {
                 noCount++;
-                document.getElementById('messagePage').style.display = 'none'; // Hide message page
-                const areYouSurePage = document.getElementById('areYouSurePage');
-                areYouSurePage.style.display = 'block'; // Show "Are you sure?" page
-                setTimeout(() => {
-                    areYouSurePage.classList.add('visible');
-                }, 10); // Fade in confirmation page
+                showPage('areYouSurePage');
 
                 let message = 'Are you sure?';
                 if (noCount >= 2) {
